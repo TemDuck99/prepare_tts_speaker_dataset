@@ -3,12 +3,22 @@ import pandas as pd
 import librosa
 from loguru import logger
 import ndjson
+import argparse
 
 
 TARGET_DIRS = ("Audios", "Transcripts")
-SPEAKER_DIR = "M1_Iseke"
-OUT_DIR = "datasets/manifest/"
 logger.add("logs/error.log", format="{time}{level}{message}")
+parser = argparse.ArgumentParser(
+                    prog="Prepare",
+                    description="Prepare manifest file, using TTS_speaker dir",
+                    )
+parser.add_argument("speaker_dir")
+parser.add_argument("-o", "--outdir", default="datasets/manifest")
+args = parser.parse_args()
+
+SPEAKER_DIR = args.speaker_dir
+OUT_DIR = args.outdir
+
 audio_path = os.path.join(SPEAKER_DIR, TARGET_DIRS[0])
 text_path = os.path.join(SPEAKER_DIR, TARGET_DIRS[1])
 
@@ -35,9 +45,19 @@ def get_duration(audio_filepath):
         return None
 
 
+def create_df():
+    audio_filepaths = pd.Series(
+        os.path.join(audio_path, file) for file in os.listdir(audio_path)
+    )
+    df = pd.DataFrame(audio_filepaths, columns=["audio_filepath"])
+    df["text"] = df["audio_filepath"].apply(lambda x: get_transcribe(x))
+    df["duration"] = df["audio_filepath"].apply(lambda x: get_duration(x))
+    return df
+
+
 def save_result(df):
-    out_csv = os.path.join(OUT_DIR, SPEAKER_DIR+".csv")
-    out_json = os.path.join(OUT_DIR, SPEAKER_DIR+".json")
+    out_csv = os.path.join(OUT_DIR, os.path.basename(SPEAKER_DIR)+".csv")
+    out_json = os.path.join(OUT_DIR, os.path.basename(SPEAKER_DIR)+".json")
     df.to_csv(out_csv, index=False)
     with open(out_json, "w") as file:
         dict_records = df.to_dict(orient="records")
@@ -45,12 +65,7 @@ def save_result(df):
 
 
 def main():
-    audio_filepaths = pd.Series(
-        os.path.join(audio_path, file) for file in os.listdir(audio_path)
-    )
-    df = pd.DataFrame(audio_filepaths, columns=["audio_filepath"])
-    df["text"] = df["audio_filepath"].apply(lambda x: get_transcribe(x))
-    df["duration"] = df["audio_filepath"].apply(lambda x: get_duration(x))
+    df = create_df()
     save_result(df)
 
 
