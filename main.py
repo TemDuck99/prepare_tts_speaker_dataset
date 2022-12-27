@@ -35,18 +35,24 @@ def get_duration(audio_filepath):
         return None
 
 
-# create Dataframe
-audio_filepaths = pd.Series(
-    os.path.join(audio_path, file) for file in os.listdir(audio_path)
-)
-df = pd.DataFrame(audio_filepaths, columns=["audio_filepath"])
-df["text"] = df.apply(lambda x: get_transcribe(x["audio_filepath"]), axis=1)
-df["duration"] = df.apply(lambda x: get_duration(x["audio_filepath"]), axis=1)
+def save_result(df):
+    out_csv = os.path.join(OUT_DIR, SPEAKER_DIR+".csv")
+    out_json = os.path.join(OUT_DIR, SPEAKER_DIR+".json")
+    df.to_csv(out_csv, index=False)
+    with open(out_json, "w") as file:
+        dict_records = df.to_dict(orient="records")
+        ndjson.dump(dict_records, file, ensure_ascii=False)
 
-# save result
-out_csv = os.path.join(OUT_DIR, SPEAKER_DIR+".csv")
-out_json = os.path.join(OUT_DIR, SPEAKER_DIR+".json")
-df.to_csv(out_csv, index=False)
-with open(out_json, "w") as file:
-    dict_records = df.to_dict(orient="records")
-    ndjson.dump(dict_records, file, ensure_ascii=False)
+
+def main():
+    audio_filepaths = pd.Series(
+        os.path.join(audio_path, file) for file in os.listdir(audio_path)
+    )
+    df = pd.DataFrame(audio_filepaths, columns=["audio_filepath"])
+    df["text"] = df["audio_filepath"].apply(lambda x: get_transcribe(x))
+    df["duration"] = df["audio_filepath"].apply(lambda x: get_duration(x))
+    save_result(df)
+
+
+if __name__ == "__main__":
+    main()
