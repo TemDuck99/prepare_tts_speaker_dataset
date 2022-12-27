@@ -65,8 +65,11 @@ def save_result(df):
 
 
 def main():
-    df = create_df()
-    save_result(df)
+    if os.path.exists(audio_path) and os.path.exists(text_path):
+        df = create_df()
+        save_result(df)
+    else:
+        print("dir empty")
 
 
 if __name__ == "__main__":
