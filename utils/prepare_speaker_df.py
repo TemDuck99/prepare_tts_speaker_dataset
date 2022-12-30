@@ -40,6 +40,8 @@ def create_df(audios_path, texts_path):
         lambda x: get_transcribe(x, text_path=texts_path)
     )
     df["duration"] = df["audio_filepath"].apply(lambda x: get_duration(x))
+    df["audio_filepath"] = df["audio_filepath"].apply(
+        lambda x: os.path.join(*x.split("/")[-4:]))
     return df
 
 
