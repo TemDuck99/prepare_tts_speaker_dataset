@@ -15,7 +15,7 @@ parser.add_argument("speakers_path")
 args = parser.parse_args()
 
 
-def prepare_datasets(speakers_dir_path: str):
+def prepare_datasets(speakers_dir_path):
     speakers_paths = get_speakers(speakers_dirs_path=speakers_dir_path)
     print(*speakers_paths, sep="\n")
     for speaker_path, basename in speakers_paths:
@@ -27,7 +27,7 @@ def prepare_datasets(speakers_dir_path: str):
 
 
 def main():
-    prepare_datasets(args.spakers_path)
+    prepare_datasets(speakers_dir_path=args.speakers_path)
 
 
 if __name__ == "__main__":
