@@ -22,13 +22,8 @@ def get_transcribe(audio_filepath, text_path):
 
 
 def get_duration(audio_filepath):
-    try:
-        duration = librosa.core.get_duration(filename=audio_filepath)
-        return duration
-    except Exception as ex:
-        logger.info(f"audio file broken: {audio_filepath}")
-        logger.error(ex)
-        return None
+    duration = librosa.core.get_duration(filename=audio_filepath, sr=22050)
+    return duration
 
 
 def create_df(audios_path, texts_path):
@@ -45,10 +40,7 @@ def create_df(audios_path, texts_path):
     return df
 
 
-def save_result(df, out_path, basename):
-    out_csv = os.path.join(out_path, basename+".csv")
-    out_json = os.path.join(out_path, basename+".json")
-    df.to_csv(out_csv, index=False)
+def save_result(df, out_json):
     with open(out_json, "w") as file:
         dict_records = df.to_dict(orient="records")
         ndjson.dump(dict_records, file, ensure_ascii=False)

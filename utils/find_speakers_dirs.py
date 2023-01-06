@@ -29,16 +29,18 @@ def search_target_dirs(path, level=1, max_level=4):
 def get_speakers(speakers_dirs_path):
     search_target_dirs(path=speakers_dirs_path)
     target_dirs = []
+    check_gender = {"m": "male", "f": "female"}
     for speaker in cache[os.path.basename(speakers_dirs_path)]:
+        gender = check_gender[speaker[0].lower()]
         if not cache[speaker]:
             cur_path = os.path.join(speakers_dirs_path, speaker)
-            target_dirs.append((cur_path, speaker))
+            target_dirs.append((cur_path, speaker, gender))
         else:
             cur_path = os.path.join(speakers_dirs_path, speaker)
             cur_paths = []
             for sub in cache[speaker]:
                 cur_paths.append(
-                    (os.path.join(cur_path, sub), f"{speaker}_{sub}")
+                    (os.path.join(cur_path, sub), f"{speaker}_{sub}", gender)
                 )
             target_dirs.extend(cur_paths)
     return target_dirs
